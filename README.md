@@ -98,7 +98,7 @@ Summary by cell
 16. Cell 16 — Code
 - Type: Code
 - Action: Define `HeteroGNNModel` class: projection heads, categorical embeddings, temporal memory, TransformerConv-based heterogeneous conv layers, temporal edge dropout, forward pass returning logits and auxiliary outputs.
-- Screenshot: ![Cell 16 output](screenshots/cell-16.png)
+
 
 17. Cell 17 — Code
 - Type: Code
