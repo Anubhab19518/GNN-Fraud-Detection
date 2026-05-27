@@ -1,147 +1,29 @@
-# Notebook Summary — Production-Grade Heterogeneous GNN for Fraud Detection
+# Fraud Detection with Heterogeneous GNN
 
-This document describes the actions performed in each cell of the notebook Copy_of_Yet_another_copy_of_Fraud_Detection_After_Feature_Engineering_v3.ipynb and provides a screenshot placeholder for the results produced by each cell. Place your screenshots in a `screenshots/` directory next to this file and replace the placeholder images with your actual screenshots.
+This project contains a production-oriented notebook for fraud detection on the IEEE-CIS dataset using a heterogeneous graph neural network. It combines transaction, card, and device entities into a graph, applies chronological splitting to avoid leakage, and trains a temporal GNN with neighbor sampling, class-imbalance handling, and evaluation focused on fraud-detection metrics.
 
-How to use:
-- Save screenshots for each cell as `screenshots/cell-01.png`, `screenshots/cell-02.png`, …
-- Open this file on GitHub to display screenshots inline.
+## What the notebook does
 
----
+- Loads engineered transaction and identity data from Google Drive.
+- Builds a heterogeneous graph with transaction, card, and device nodes.
+- Adds static and temporal edges so the model can learn both structural and time-aware patterns.
+- Splits data chronologically into train, validation, and test sets.
+- Trains a GNN with sampling-based mini-batches to keep memory use manageable.
+- Evaluates the model with ROC-AUC, PR-AUC, F1, precision, recall, and confusion matrices.
+- Includes follow-up analysis for score distributions, hard negatives, calibration, and cascade-style refinement.
 
-Summary by cell
+## Repository contents
 
-1. Cell 1 — Markdown
-- Type: Markdown
-- Action: Notebook title, pipeline overview and highlights (Drive integration, heterogeneous graph construction, temporal splitting, sampling, architecture, evaluation).
+- `Copy_of_Yet_another_copy_of_Fraud_Detection_After_Feature_Engineering_v3.ipynb`: main notebook.
+- `Notebook_Summary.md`: screenshot-friendly notebook walkthrough.
+- `screenshots/`: extracted or manually added output images.
 
+## Results and reporting
 
-2. Cell 2 — Code
-- Type: Code
-- Action: Detect PyTorch/CUDA versions; install PyG and dependencies; print PyG version.
-- Expected outputs: Detected PyTorch/CUDA string and PyG version.
+The notebook produces training logs, graph diagnostics, final test metrics, and visualization outputs that are useful for GitHub documentation or a project portfolio. The screenshots folder can be linked from the Markdown summary to show the most important results inline.
 
+## Notes
 
-3. Cell 3 — Code
-- Type: Code
-- Action: Mount Google Drive (`drive.mount('/content/drive')`).
-- Expected outputs: Drive mount confirmation and path listing.
-
-
-4. Cell 4 — Code
-- Type: Code
-- Action: Duplicate/more explicit Drive mount and os import (redundant mount block).
-
-
-5. Cell 5 — Code
-- Type: Code
-- Action: Configuration: set `BASE_DIR`, construct CSV paths and verify CSV existence.
-- Expected outputs: Success/warning messages indicating whether CSVs were found.
-
-
-6. Cell 6 — Code
-- Type: Code
-- Action: Define `reduce_mem_usage`, `add_causal_entity_dynamics`, load transformed transaction and identity CSVs, reduce memory, create temporal encodings.
-- Expected outputs: Memory reduction report; shapes of transaction and identity tables.
-
-
-7. Cell 7 — Code
-- Type: Code
-- Action: Text normalization (`clean_id_30`, `clean_id_31`, `clean_device_info`), create combined device fingerprints, normalize numerical ID columns, map categorical columns to indices, merge identity back to transactions, scale continuous features, map entities to indices.
-- Expected outputs: Prints about normalization, mapping counts for card/device, and total continuous features count.
-
-
-8. Cell 8 — Code
-- Type: Code
-- Action: Build `HeteroData` graph: add `transaction`, `card`, `device` nodes and static edges (`has_card`, `has_device`), compute and add causal temporal edges per entity (card, device) with edge attributes, print graph summary, free large DataFrames.
-- Expected outputs: Progress prints while adding temporal edges and final graph summary (node/edge counts and attributes).
-- Screenshot: ![Cell 08 output](screenshots/cell-08.png)
-
-9. Cell 9 — Markdown
-- Type: Markdown
-- Action: Introduces Graph homophily/heterophily analysis for temporal edges.
-- Screenshot: ![Cell 09 output](screenshots/cell-09.png)
-
-10. Cell 10 — Code
-- Type: Code
-- Action: Compute homophily for temporal transaction edges (card/device), print total edges, same-class connections, homophily and heterophily.
-- Expected outputs: Homophily and heterophily statistics for each temporal edge type.
-
-
-11. Cell 11 — Markdown
-- Type: Markdown
-- Action: Notes on chronological data splitting rationale and why it prevents leakage.
-
-
-12. Cell 12 — Code
-- Type: Code
-- Action: Create chronological train/val/test splits by `TransactionDT`, assign boolean masks `train_mask`, `val_mask`, `test_mask` on `data['transaction']`, print split sizes.
-- Expected outputs: Counts of training, validation, and testing nodes.
-
-
-13. Cell 13 — Markdown
-- Type: Markdown
-- Action: Describes neighbor sampling loader strategy (`NeighborLoader`) for scalable training.
-
-
-14. Cell 14 — Code
-- Type: Code
-- Action: Initialize `NeighborLoader` instances for train/val/test with temporal sampling (`time_attr='time'`), set neighbor sizes and batch sizes, print initialization confirmation.
-- Expected outputs: `Dataloaders initialized.`
-
-
-15. Cell 15 — Code
-- Type: Code
-- Action: Define `Time2VecEncoding`, `RelationScaledConv`, `TemporalMemoryModule`, and auxiliary losses (`info_nce_loss`, `temporal_consistency_loss`, `anomaly_energy_loss`).
-- Purpose: Provide time encoding and auxiliary modules used by the main model.
-
-
-16. Cell 16 — Code
-- Type: Code
-- Action: Define `HeteroGNNModel` class: projection heads, categorical embeddings, temporal memory, TransformerConv-based heterogeneous conv layers, temporal edge dropout, forward pass returning logits and auxiliary outputs.
-
-
-17. Cell 17 — Code
-- Type: Code
-- Action: Define `FocalLoss`, `train_epoch`, and `evaluate_model` functions used during training and validation.
-
-
-18. Cell 18 — Code
-- Type: Code
-- Action: Initialize device, compute class imbalance `pos_weight`, set hyperparameters, instantiate model, optimizer, criterion, scheduler; run the training loop with early stopping and checkpoint saving (`best_hetero_gnn.pt`).
-- Expected outputs: Per-epoch logs (Train Loss, Val ROC-AUC, Val PR-AUC), checkpoint save messages and potential early stopping.
-- Screenshot: ![Cell 18 output](screenshots/cell-18.png)
-
-
-19. Cell 19 — Code
-- Type: Code
-- Action: Subgraph framework: temporal ego-subgraph extraction, motif statistics, `TemporalSubgraphEncoder`, structural signatures and utilities for subgraph-based analysis.
-- Purpose: Tools for motif analysis, causal ego-subgraphs, and subgraph contrastive encoding.
-
-
-20. Cell 20 — Code
-- Type: Code
-- Action: Load best checkpoint (`best_hetero_gnn.pt`), tune threshold on validation to maximize F1, evaluate on test set using chosen threshold, print final test metrics and classification report, confusion matrix.
-- Expected outputs: Final ROC-AUC, PR-AUC, F1, Precision, Recall and classification report + confusion matrix.
-- Screenshot: ![Cell 20 output](screenshots/cell-20.png)
-
-21. Cell 21 — Code
-- Type: Code
-- Action: Plot distribution of model scores for Fraud vs Non-Fraud (histograms), compute and print descriptive stats and percentiles for each group, display matplotlib figure.
-- Expected outputs: Numeric statistics and a two-panel histogram figure.
- - Screenshot: ![Cell 21 output](screenshots/cell-21-output-01.png)
- - Screenshot: ![Cell 21 output](screenshots/cell-21-output-02.png)
-
-22. Cell 22 — Code
-- Type: Code
-- Action: Hard negative mining and analysis: collect predictions per split, build transaction context, summarize high-confidence false positives, cluster communities, build stage-2 dataset and calibrate scores, train stage-2 false-positive suppressor and evaluate it.
-- Expected outputs: Counts of mined hard negatives, clustering summaries, calibration diagnostics, stage-2 training logs and evaluation metrics (ROC-AUC, PR-AUC, F1, ECE, classification report).
-
-
-23. Cell 23 — Code
-- Type: Code
-- Action: Cascade evaluation: combine stage-1 probabilities and stage-2 suppressor probabilities to compute cascade scores; report cascade ROC-AUC, PR-AUC, ECE and classification results; show suppression statistics for mined false positives.
-- Expected outputs: Cascade performance metrics and confusion matrix.
-
-
----
+- The workflow is designed for Colab or a similar GPU-enabled notebook environment.
+- The README intentionally gives a high-level overview instead of a cell-by-cell explanation.
 
